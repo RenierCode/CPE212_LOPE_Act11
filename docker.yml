@@ -1,0 +1,53 @@
+---
+- hosts: all
+  become: true
+  tasks:
+
+#  - name: Install Docker
+#    apt:
+#      name: docker.io
+#      state: latest
+
+#  - name: Start Docker
+#    service:
+#      name: docker
+#      enabled: yes
+#      state: started
+
+  - name: Add docker group to current user
+    group:
+      name: docker
+      state: present
+
+  - name: Add user to docker group
+    user:
+      name: rnrlope
+      groups: docker
+      append: yes
+
+  - name: change permission of docker.sock
+    file:
+      path: /var/run/docker.sock
+      state: file
+      owner: root
+      group: docker
+      mode: "666"
+
+  - name: Create Directory for Dockerfile
+    file:
+      path: /home/rnrlope/Docker
+      state: directory
+    become: yes
+
+  - name: Copy Dockerfile
+    copy:
+      src: Dockerfile
+      dest: /home/rnrlope/Docker/Dockerfile
+
+  - name: Build Docker Image
+    docker_image:
+      name: web-db-service
+      source: build
+      build:
+        path: /home/rnrlope/Docker
+      state: present
