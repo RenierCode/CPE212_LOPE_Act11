@@ -1,0 +1,23 @@
+---
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Add docker group to current user
+    group:
+      name: docker
+      state: present
+
+  - name: Add user to docker group
+    user:
+      name: rnrlope
+      groups: docker
+      append: yes
+
+  - name: change permission of docker.sock
+    file:
+      path: /var/run/docker.sock
+      state: file
+      owner: root
+      group: docker
+      mode: "666"
